@@ -1,7 +1,7 @@
-// boot da libary 
+-- boot da libary 
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
-// Main 
+-- Main 
 
 local Window = Rayfield:CreateWindow({
    Name = "Plane Simulator",
@@ -39,18 +39,18 @@ local Window = Rayfield:CreateWindow({
    }
 })
 
-// Farm Tab 
+-- Farm Tab 
 
 local Tab = Window:CreateTab("Farm")
 
-// Training farm section 
+-- Training farm section 
 
 local Section = Tab:CreateSection("Training Farm")
 
-// Wins Farm section 
+-- Wins Farm section 
 
 local Section = Tab:CreateSection("Wins Farm")
 
-// Eggs Farm section 
+-- Eggs Farm section 
 
 local Section = Tab:CreateSection("Eggs Farm")
