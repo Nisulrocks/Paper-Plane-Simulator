@@ -39,6 +39,9 @@ local Window = Rayfield:CreateWindow({
    }
 })
 
+-- farm tab
+local Tab = Window:CreateTab(" Auto Farm ")
+
 -- Training farm section 
 
 local Section = Tab:CreateSection("Training Farm")
@@ -55,40 +58,49 @@ local ZoneEquipment = {
         {ID = 3, Name = "Equipment 3"},
         {ID = 4, Name = "VIP Equipment", RequiresVIP = true}
     }
-    -- Add more zones as needed when implemented
-}
+}  -- Fixed table definition
+-- Add more zones as needed when implemented
 
 local TrainingToggle = Tab:CreateToggle({
-    Name = "Auto Training",
-    CurrentValue = false,
-    Flag = "AutoTraining",
-    Callback = function(Value)
-        TrainingEnabled = Value
-        if TrainingEnabled then
-            -- Check if selected equipment requires VIP
-            if ZoneEquipment[SelectedZone][SelectedEquipment].RequiresVIP then
-                Rayfield:Notify({
-                    Title = "VIP Required",
-                    Content = "This equipment requires VIP. Make sure you have VIP before using it.",
-                    Duration = 5,
-                })
-            end
-            
-            Rayfield:Notify({
-                Title = "Auto Training",
-                Content = "Auto Training has been enabled for " .. SelectedZone .. " using " .. ZoneEquipment[SelectedZone][SelectedEquipment].Name,
-                Duration = 3,
-            })
-            StartTraining()
-        else
-            Rayfield:Notify({
-                Title = "Auto Training",
-                Content = "Auto Training has been disabled",
-                Duration = 3,
-            })
-            -- Training will stop on next loop iteration
-        end
-    end,
+   Name = "Auto Training",
+   CurrentValue = false,
+   Flag = "AutoTraining",
+   Callback = function(Value)
+       TrainingEnabled = Value
+       if TrainingEnabled then
+           -- Check if selected equipment requires VIP
+           if ZoneEquipment and ZoneEquipment[SelectedZone] and 
+              ZoneEquipment[SelectedZone][SelectedEquipment] and 
+              ZoneEquipment[SelectedZone][SelectedEquipment].RequiresVIP then
+               Rayfield:Notify({
+                   Title = "VIP Required",
+                   Content = "This equipment requires VIP. Make sure you have VIP before using it.",
+                   Duration = 5,
+               })
+           end
+           
+           local equipmentName = "Unknown Equipment"
+           if ZoneEquipment and ZoneEquipment[SelectedZone] and 
+              ZoneEquipment[SelectedZone][SelectedEquipment] and 
+              ZoneEquipment[SelectedZone][SelectedEquipment].Name then
+               equipmentName = ZoneEquipment[SelectedZone][SelectedEquipment].Name
+           end
+           
+           Rayfield:Notify({
+               Title = "Auto Training",
+               Content = "Auto Training has been enabled for " .. tostring(SelectedZone) .. " using " .. equipmentName,
+               Duration = 3,
+           })
+           StartTraining()
+       else
+           Rayfield:Notify({
+               Title = "Auto Training",
+               Content = "Auto Training has been disabled",
+               Duration = 3,
+           })
+           -- Training will stop on next loop iteration
+       end
+   end,
 })
 
 local ZoneDropdown = Tab:CreateDropdown({
@@ -108,61 +120,96 @@ local ZoneDropdown = Tab:CreateDropdown({
 
 -- Create equipment options for the dropdown
 local equipmentOptions = {}
-for i, equipment in ipairs(ZoneEquipment[SelectedZone]) do
-    equipmentOptions[i] = equipment.Name
+if type(ZoneEquipment[SelectedZone]) == "table" then
+    for i, equipment in ipairs(ZoneEquipment[SelectedZone]) do
+        equipmentOptions[i] = equipment.Name
+    end
+else
+    equipmentOptions = {"Equipment 1"}  -- Default fallback
 end
 
 local EquipmentDropdown = Tab:CreateDropdown({
-    Name = "Select Equipment",
-    Options = equipmentOptions,
-    CurrentOption = equipmentOptions[1],
-    Flag = "TrainingEquipment",
-    Callback = function(Option)
-        -- Find the equipment ID based on the selected name
-        for i, equipment in ipairs(ZoneEquipment[SelectedZone]) do
-            if equipment.Name == Option then
-                SelectedEquipment = i
-                
-                -- Check if equipment requires VIP
-                if equipment.RequiresVIP then
-                    Rayfield:Notify({
-                        Title = "VIP Required",
-                        Content = "This equipment requires VIP. Make sure you have VIP before using it.",
-                        Duration = 5,
-                    })
-                end
-                
-                break
-            end
-        end
-        
-        Rayfield:Notify({
-            Title = "Equipment Selected",
-            Content = "Selected equipment: " .. Option,
-            Duration = 3,
-        })
-    end,
+   Name = "Select Equipment",
+   Options = equipmentOptions,
+   CurrentOption = equipmentOptions[1],
+   Flag = "TrainingEquipment",
+   Callback = function(Option)
+       -- Find the equipment ID based on the selected name
+       if ZoneEquipment[SelectedZone] then
+           for i, equipment in ipairs(ZoneEquipment[SelectedZone]) do
+               if equipment and equipment.Name == Option then
+                   SelectedEquipment = i
+                   
+                   -- Check if equipment requires VIP
+                   if equipment.RequiresVIP then
+                       Rayfield:Notify({
+                           Title = "VIP Required",
+                           Content = "This equipment requires VIP. Make sure you have VIP before using it.",
+                           Duration = 5,
+                       })
+                   end
+                   
+                   break
+               end
+           end
+           
+           Rayfield:Notify({
+               Title = "Equipment Selected",
+               Content = "Selected equipment: " .. Option,
+               Duration = 3,
+           })
+       else
+           Rayfield:Notify({
+               Title = "Error",
+               Content = "Selected zone does not exist. Please select a valid zone.",
+               Duration = 5,
+           })
+       end
+   end,
 })
 
 -- Training loop function
 local function StartTraining()
-    spawn(function()
-        while TrainingEnabled do
-            -- Fire the remote event to gain strength
-            local args = {
-                "Train",
-                {
-                    SelectedEquipment,
-                    SelectedZone
-                }
-            }
-            
-            game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("RewardAction"):FireServer(unpack(args))
-            
-            -- Wait before firing again (adjust this value as needed)
-            wait(1)
-        end
-    end)
+   spawn(function()
+       while TrainingEnabled do
+           -- Add safety checks
+           if not ZoneEquipment or not ZoneEquipment[SelectedZone] or not ZoneEquipment[SelectedZone][SelectedEquipment] then
+               Rayfield:Notify({
+                   Title = "Training Error",
+                   Content = "Invalid zone or equipment selected. Please check your selections.",
+                   Duration = 5,
+               })
+               -- Pause briefly before checking again
+               wait(2)
+           else
+               -- Fire the remote event to gain strength
+               local args = {
+                   "Train",
+                   {
+                       SelectedEquipment,
+                       SelectedZone
+                   }
+               }
+               
+               local success, error = pcall(function()
+                   game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("RewardAction"):FireServer(unpack(args))
+               end)
+               
+               if not success then
+                   Rayfield:Notify({
+                       Title = "Remote Error",
+                       Content = "Error firing remote event. Training paused.",
+                       Duration = 5,
+                   })
+                   -- Pause briefly before trying again
+                   wait(5)
+               else
+                   -- Wait before firing again (adjust this value as needed)
+                   wait(1)
+               end
+           end
+       end
+   end)
 end
 
 -- Wins Farm section 
