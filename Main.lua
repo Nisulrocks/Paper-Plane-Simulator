@@ -17,7 +17,7 @@ local Window = Rayfield:CreateWindow({
 
    ConfigurationSaving = {
       Enabled = true,
-      FolderName = nil, 
+      FolderName = "Plane Simulator", 
       FileName = "Plane Simulator"
    },
 
@@ -38,3 +38,19 @@ local Window = Rayfield:CreateWindow({
       Key = {"Hello"} 
    }
 })
+
+// Farm Tab 
+
+local Tab = Window:CreateTab("Farm")
+
+// Training farm section 
+
+local Section = Tab:CreateSection("Training Farm")
+
+// Wins Farm section 
+
+local Section = Tab:CreateSection("Wins Farm")
+
+// Eggs Farm section 
+
+local Section = Tab:CreateSection("Eggs Farm")
