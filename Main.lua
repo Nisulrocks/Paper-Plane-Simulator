@@ -5,6 +5,7 @@ local RunService = game:GetService("RunService")
 local autoFarmConnection  -- Separate variable for Auto Farm
 local winsConnection      -- Separate variable for Wins Farm
 local eggConnection       -- Separate variable for Eggs Farm
+local rebirthConnection   -- Separate variable for Rebirth Farm
 local selectedEgg = nil
 
 -- Main 
@@ -58,7 +59,7 @@ local Trainer = 1
 
 local Dropdown = Tab:CreateDropdown({
     Name = "Select Zone",
-    Options = {"Zone1","Zone2","Zone3"},
+    Options = {"Zone1","Zone2","Zone3","Zone4","Zone5","Zone6","Zone7","Zone8","Zone9","Zone10","Zone11"},
     CurrentOption = {"Zone1"},
     MultipleOptions = false,
     Flag = "Dropdown1", 
@@ -140,7 +141,35 @@ local Dropdown = Tab:CreateDropdown({
  })
 
 
+ -- Auto Rebirth Farm section 
+local Section = Tab:CreateSection("Auto Rebirth Farm")
+
+local Toggle = Tab:CreateToggle({
+    Name = "Auto Rebirth Farm",
+    CurrentValue = false,
+    Flag = "Toggle1", 
+    Callback = function(Value)
+    -- The function that takes place when the toggle is pressed
+    -- The variable (Value) is a boolean on whether the toggle is true or false
+    if Value then
+        rebirthConnection = RunService.Heartbeat:Connect(function()
+            local args = {
+                "Rebirth"
+            }
+            game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("RewardAction"):FireServer(unpack(args))
+        end)
+    else
+        if rebirthConnection then
+            rebirthConnection:Disconnect()
+            rebirthConnection = nil
+        end
+    end
+    end,
+ })
+
+
 -- Eggs Farm section 
+local EggsTab = Window:CreateTab(" Eggs Automation ")
 
 -- Function to get all egg names
 local function getAllEggNames()
@@ -164,13 +193,13 @@ local function getAllEggNames()
 end
 
 -- Eggs Farm section
-local Section = Tab:CreateSection("Eggs Farm")
+local Section = EggsTab:CreateSection("Eggs Farm")
 
 -- Get all available egg names
 local availableEggs = getAllEggNames()
 
 -- Create dropdown for egg selection
-local Dropdown = Tab:CreateDropdown({
+local Dropdown = EggsTab:CreateDropdown({
     Name = "Select Egg to Farm",
     Options = availableEggs,
     CurrentOption = availableEggs[1] or "None",
@@ -198,7 +227,7 @@ if availableEggs[1] then
 end
 
 -- Auto Egg Farm Toggle
-local Toggle = Tab:CreateToggle({
+local Toggle = EggsTab:CreateToggle({
     Name = "Auto Egg Farm",
     CurrentValue = false,
     Flag = "EggFarmToggle",
@@ -243,7 +272,7 @@ local Toggle = Tab:CreateToggle({
 })
 
 -- Refresh button to update egg list
-local Button = Tab:CreateButton({
+local Button = EggsTab:CreateButton({
     Name = "Refresh Egg List",
     Callback = function()
         availableEggs = getAllEggNames()
