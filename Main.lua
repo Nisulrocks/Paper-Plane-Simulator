@@ -177,18 +177,18 @@ local Dropdown = Tab:CreateDropdown({
     Flag = "EggDropdown",
     Callback = function(Option)
         -- Debug what we're getting from the dropdown
-        --print("Dropdown returned:", Option)
-        --print("Type:", type(Option))
+        print("Dropdown returned:", Option)
+        print("Type:", type(Option))
         
         -- Make sure we get the string value
         if type(Option) == "table" then
             selectedEgg = Option.Name or Option.name or Option[1] or tostring(Option)
-            --print("Extracted from table:", selectedEgg)
+            print("Extracted from table:", selectedEgg)
         else
             selectedEgg = tostring(Option) -- Convert to string just in case
         end
         
-        --print("Final selectedEgg:", selectedEgg, "Type:", type(selectedEgg))
+        print("Final selectedEgg:", selectedEgg, "Type:", type(selectedEgg))
     end,
 })
 
@@ -207,10 +207,10 @@ local Toggle = Tab:CreateToggle({
             if selectedEgg then
                 eggConnection = RunService.Heartbeat:Connect(function()
                     -- Debug the exact values
-                    --print("selectedEgg variable:", selectedEgg)
-                    --print("selectedEgg type:", type(selectedEgg))
-                    --print("selectedEgg length:", string.len(selectedEgg))
-                    --print("selectedEgg bytes:", string.byte(selectedEgg, 1, -1))
+                    print("selectedEgg variable:", selectedEgg)
+                    print("selectedEgg type:", type(selectedEgg))
+                    print("selectedEgg length:", string.len(selectedEgg))
+                    print("selectedEgg bytes:", string.byte(selectedEgg, 1, -1))
                     
                     local args = {
                         selectedEgg,
@@ -218,7 +218,7 @@ local Toggle = Tab:CreateToggle({
                     }
                     
                     -- Print exactly what we're sending
-                    --print("Sending args:", args[1], args[2])
+                    print("Sending args:", args[1], args[2])
                     
                     local success, result = pcall(function()
                         return game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("GetRandomPet"):InvokeServer(unpack(args))
@@ -228,9 +228,9 @@ local Toggle = Tab:CreateToggle({
                         print("Error occurred:", result)
                     end
                 end)
-                --print("Started farming:", selectedEgg)
+                print("Started farming:", selectedEgg)
             else
-                --print("No egg selected!")
+                print("No egg selected!")
             end
         else
             if eggConnection then
@@ -250,4 +250,3 @@ local Button = Tab:CreateButton({
         print("Available eggs:", table.concat(availableEggs, ", "))
     end,
 })
-
